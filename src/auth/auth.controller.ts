@@ -1,43 +1,91 @@
-import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
-import { GrpcMethod } from "@nestjs/microservices";
+import {
+    Controller,
+    Get,
+    OnModuleInit,
+    Req,
+    Res,
+    UseGuards,
+} from "@nestjs/common";
+import { Client, ClientGrpc, GrpcMethod } from "@nestjs/microservices";
 import { AuthService } from "./auth.service";
-import { GoogleGuard, RefreshGuard } from "./guards";
-import { IGetAccessTokenResponse } from "./auth.interface";
 import {
     REFRESH_TOKEN_COOKIE_KEY,
     REFRESH_TOKEN_COOKIE_OPTION,
 } from "../shared/constants";
 import { Response } from "express";
+import { UserEntity } from "src/shared/access/user.dao";
+import { UserService } from "src/shared/services/user.service";
+import { grpcClientOptions as userGrpc } from "src/shared/options/user.grpc";
+import { Observable } from "rxjs";
+import { User } from "src/shared/transfer/user.dto";
+import { BoolValue } from "google.protobuf";
+import {
+    IAccessPayload,
+    IGetAccessToken,
+    IGetAccessTokenResponse,
+    IGetRefreshTokenAndIsNewUserByLogin,
+    IGetRefreshTokenAndIsNewUserByLoginResponse,
+    IGetRefreshTokenIsValid,
+} from "src/shared/transfer/auth.dto";
 
 @Controller()
-export class AuthController {
+export class AuthController implements OnModuleInit {
     private readonly FRONTEND_URL: string;
+    @Client(userGrpc)
+    private client: ClientGrpc;
+    private userService: UserService;
 
     constructor(private readonly authService: AuthService) {}
 
-    @Get()
-    public hello(): string {
+    onModuleInit() {
+        this.userService = this.client.getService<UserService>("UserService");
+    }
+
+    @GrpcMethod("AuthService", "getHello")
+    public getHello(): string {
         return "Hello, Auth Module!";
     }
 
-    @GrpcMethod("auth", "getAccessToken")
-    @UseGuards(RefreshGuard)
+    @GrpcMethod("AuthService", "accessValidate")
+    public accessValidate({ id }: IAccessPayload): Observable<User> {
+        return this.userService.getUserById({ value: id });
+    }
+
+    @GrpcMethod("AuthService", "getRefreshTokenIsValid")
+    public async getRefreshTokenIsValid({
+        userId,
+        refreshToken,
+    }: IGetRefreshTokenIsValid): Promise<BoolValue> {
+        return {
+            value: await this.authService.getRefreshTokenIsValid({
+                userId,
+                refreshToken,
+            }),
+        };
+    }
+
+    @GrpcMethod("AuthService", "getRefreshTokenAndIsNewUserByLogin")
+    public async getRefreshTokenAndIsNewUserByLogin(
+        user: IGetRefreshTokenAndIsNewUserByLogin,
+    ): Promise<IGetRefreshTokenAndIsNewUserByLoginResponse> {
+        return await this.authService.getRefreshTokenAndIsNewUserByLogin(user);
+    }
+
+    @GrpcMethod("AuthService", "getAccessToken")
     public async getAccessToken(
-        @Req() req: any,
+        payload: IGetAccessToken,
     ): Promise<IGetAccessTokenResponse> {
         const accessToken = await this.authService.createAccessTokenByUserId(
-            req.user.id,
+            payload.userId,
         );
         return { accessToken };
     }
 
     @GrpcMethod("auth", "googleLogin")
-    @UseGuards(GoogleGuard)
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     public async googleLogin() {}
 
     @GrpcMethod("auth", "googleRedirect")
-    @UseGuards(GoogleGuard)
     public async googleRedirect(@Req() req: any, @Res() res: Response) {
         const { refreshToken, isNewUser } =
             await this.authService.getRefreshTokenAndIsNewUserByLogin(req.user);

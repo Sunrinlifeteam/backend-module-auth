@@ -2,14 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Repository } from "typeorm";
 import { UserEntity } from "../shared/access/user.dao";
+import { ConfigService } from "@nestjs/config";
+import { InjectRepository } from "@nestjs/typeorm";
 import {
     IGetRefreshTokenAndIsNewUserByLogin,
     IGetRefreshTokenAndIsNewUserByLoginResponse,
     IGetRefreshTokenIsValid,
     IUpdateUserRefreshToken,
-} from "./auth.interface";
-import { ConfigService } from "@nestjs/config";
-import { InjectRepository } from "@nestjs/typeorm";
+} from "src/shared/transfer/auth.dto";
 
 @Injectable()
 export class AuthService {

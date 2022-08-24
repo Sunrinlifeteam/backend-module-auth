@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
+import { UserEntity } from "./shared/access/user.dao";
 
 @Module({
     imports: [
@@ -12,7 +13,7 @@ import { ConfigService } from "@nestjs/config";
                 database: config.get<string>("DB_NAME"),
                 username: config.get<string>("DB_USERNAME"),
                 password: config.get<string>("DB_PASSWORD"),
-                entities: [],
+                entities: [UserEntity],
                 migrations: [],
                 subscribers: [],
                 synchronize: true,

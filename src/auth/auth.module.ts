@@ -5,9 +5,6 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserEntity } from "../shared/access/user.dao";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { AccessStrategy } from "./strategies/access.strategy";
-import { GoogleStrategy } from "./strategies/google.stratgy";
-import { RefreshStrategy } from "./strategies/refresh.strategy";
 
 @Module({
     imports: [
@@ -26,12 +23,6 @@ import { RefreshStrategy } from "./strategies/refresh.strategy";
         }),
     ],
     controllers: [AuthController],
-    providers: [
-        AuthService,
-        JwtService,
-        GoogleStrategy,
-        AccessStrategy,
-        RefreshStrategy,
-    ],
+    providers: [AuthService],
 })
 export class AuthModule {}
