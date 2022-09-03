@@ -11,14 +11,14 @@ import { AuthService } from "./auth.service";
 import {
     REFRESH_TOKEN_COOKIE_KEY,
     REFRESH_TOKEN_COOKIE_OPTION,
-} from "../shared/constants";
+} from "shared/lib/constants";
 import { Response } from "express";
-import { UserEntity } from "src/shared/access/user.dao";
-import { UserService } from "src/shared/services/user.service";
-import { grpcClientOptions as userGrpc } from "src/shared/options/user.grpc";
+import { UserEntity } from "shared/lib/access/user.dao";
+import { UserService } from "shared/lib/services/user.service";
+import { grpcClientOptions as userGrpc } from "shared/lib/options/user.grpc";
 import { Observable } from "rxjs";
-import { User } from "src/shared/transfer/user.dto";
-import { BoolValue } from "google.protobuf";
+import { User } from "shared/lib/transfer/user.dto";
+import { BoolValue } from "google/protobuf/wrappers";
 import {
     IAccessPayload,
     IGetAccessToken,
@@ -26,7 +26,7 @@ import {
     IGetRefreshTokenAndIsNewUserByLogin,
     IGetRefreshTokenAndIsNewUserByLoginResponse,
     IGetRefreshTokenIsValid,
-} from "src/shared/transfer/auth.dto";
+} from "shared/lib/transfer/auth.dto";
 
 @Controller()
 export class AuthController implements OnModuleInit {

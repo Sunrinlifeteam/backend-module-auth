@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
-import { UserEntity } from "./shared/access/user.dao";
+import { UserEntity } from "shared/lib/access/user.dao";
 
 @Module({
     imports: [
